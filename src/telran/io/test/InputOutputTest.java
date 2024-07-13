@@ -53,8 +53,8 @@ class InputOutputTest {
 	@Test
 	void pathTest() {
 		Path pathCurrent = Path.of(".");
-//		System.out.printf("%s - path \".\"\n",pathCurrent);
-//		System.out.printf("%s - normolized path \".\"\n", pathCurrent.normalize());
+		System.out.printf("%s - path \".\"\n",pathCurrent);
+		System.out.printf("%s - normolized path \".\"\n", pathCurrent.normalize());
 		System.out.printf("%s - %s\n",
 				pathCurrent.toAbsolutePath().normalize(),
 				Files.isDirectory(pathCurrent) ? "directory" : "file");
@@ -65,7 +65,7 @@ class InputOutputTest {
 	}
 	@Test
 	void printDirectoryTest() throws IOException {
-		printDirectory("..", 3);
+		printDirectory(".", 3);
 	}
 	private void printDirectory(String dirPathStr, int depth) throws IOException {
 		//TODO
@@ -75,30 +75,36 @@ class InputOutputTest {
 		//      <name> 
 		//using FIles.walkFileTree
 		Path path = Path.of(dirPathStr).toAbsolutePath().normalize();
-		//TODO
+		
+		if(!Files.isDirectory(path)) throw new IllegalArgumentException("this is not a directory");
+		
 		Files.walkFileTree(path, new HashSet<>(), depth, new FileVisitor<Path>() {
 
 			@Override
 			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+				printFileOrDir(dir);
 				return FileVisitResult.CONTINUE;
+			}
+
+			private void printFileOrDir(Path dir) {
+				System.out.printf("%s %s - %s \n", " ".repeat((dir.getNameCount()-path.getNameCount())*5), dir.getFileName(), Files.isDirectory(dir) ? "dir" : "file");
 			}
 
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-				// TODO Auto-generated method stub
-				return null;
+				printFileOrDir(file);
+				return FileVisitResult.CONTINUE;
 			}
 
 			@Override
 			public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
-				// TODO Auto-generated method stub
-				return null;
+				System.err.println(exc);
+				return FileVisitResult.CONTINUE;
 			}
 
 			@Override
 			public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-				// TODO Auto-generated method stub
-				return null;
+				return FileVisitResult.CONTINUE;
 			}
 		});
 		
